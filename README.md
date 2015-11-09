@@ -1,57 +1,58 @@
-Raspbian is the most popular Linux based image for Raspberry Pi. The image is versatile and developer friendly.
-Raspberry Pi is the favourite choice for embedded developers as it is the most supported and 
-cost effective board available in the market.
-Anyone who wants to explore embedded systems using real hardware should consider getting a Raspberry Pi.
-From here on I will simply call Raspberry Pi as the "board".
+Script Name:
+	RaspImgConfig.sh
 
-Below are the steps to boot the Raspberry for the first time:-
-1. Download the Raspbian Image.
-2. Unzip the image.
-3. Burn the image on to the SD card(which will be inserted into the Raspberry Pi board.)
-4. Insert the SD card in the SD card slot of the board.
-5. Connect a HDMI monitor with the board.
-6. Connect a Keyboard and Mouse with the board.
-7. Connect a network cable to your PC/Laptop or Ethernet switch/ADSL Modem/Router, I hope you got the point. 
-8. Connect the USB power cable from the board to you PC/Laptop or to a power adapter.
-9. After you insert the USB power cable you will see in the monitor a configuration prompt
-   asking you to continue. You will have to use your keyboard to navigate.
-10.You can now use the the board in graphical mode with X enabled or command line mode
-   through SSH using network, you will find a lot of articles over the internet related to this.
-   
-Playing with real hardware is lot more fun than virtualization. You can also use QEMU on Linux to 
-emulate an ARM hardware and do experiments on that but with real hardware you can make real projects which
-works.
+Description:
+	The main purpose of the script is to configure the Raspbian Image with network and wireless settings so that when you start the Raspberry Pi
+	for the first time with a new Raspbian image, it can directly get connected with your WiFi router with static or dynamic IP or if you
+	want to connect the Raspberry Pi with your PC/Laptop with a ethernet patch cable having a P2P connection by giving static IP to both your PC
+	and Raspberry Pi.
+	Tested with Ubuntu 14.04
+	IMPORTANT: Downloading the latest Raspbian Linux Image requires a lot of time, progress will be shown, be patient :-)
 
-Having said the above, if you want to build some project which does not require a monitor or keyboard or mouse
-or even a network, suppose an "automatic pump controller" or "NAS server" or some system which does not have any
-use for a monitor or a keyboard, you will require a network though to communicate with the board.
+How to use the script to configure:
 
-The basic approach of any embedded development is a 'Host' machine and a 'Target' machine. The host machine in
-this case will be your Laptop/PC and the target will be the Raspberry Pi. If you have a Raspberry Pi without a 
-monitor, you will either use Putty or some terminal emulator in Windows to SSH into the board via Ethernet.
-Either you can develop your code/script in the host machine and transfer the contents to the target machine
-or you can directly operate on the target machine as you have an SSH connection. 
+	1. Download the script from <www.github.com/glowingthumb/raspimgconfig> by navigating to the page and using the "Download Zip" option or you
+	   can "git clone" the repository.
 
-The below mentioned link directs you to a topic which describes how you can configure headless Raspbian without
-keyboard or mouse or monitor for the first time. The article solves all the issues except that the network is
-in DHCP mode and if you are using cross cable directly with you Laptop/PC, the board will not get an IP and
-you will not be able to connect with the board using SSH. Further in DHCP also you need to run some commands
-to find the board and SSH into it and run the configuration(raspiconfig).
+	2. Make sure you have atleast 4GB space where you are downloading, making a new directory is advised.
 
-https://www.raspberrypi.org/forums/viewtopic.php?f=91&t=74176
+	3. Either use "sudo" or change to "root" user as this script does mounting/unmounting stuff.
 
-Having an image which is preconfigured for your hardware will reduce the need for monitor, mouse or keyboard, 
-only a network cable will do. There can also be a situation where you are carrying the Raspberry Pi board for
-some demonstration and due to some faulty configurations you managed to corrupt the image. As you are travelling 
-you may not have a keyboard or monitor or a router/switch handy. How are you going to configure your board after 
-burning a new image to your SD card as due to DHCP your board does not manage to get an IP address?
+	4. Give execute permission to the script- "chomd +x RaspImgConfig.sh"
 
-The RaspImgConfig.sh solves this problem. The script optionally downloads the latest Raspbian image from the Internet 
-It asks you details and configures the image before burning it on the SD card. The script gives a static IP 
-to the image, searches, connects with the board, runs the 'raspiconfig' script and, well other features will be added 
-in future. For now the script will facilitate you to use Raspberry with Raspbian Image without the need for a 
-keyboard/mouse and monitor. 
+	5. Execute it "./RaspImgConfig.sh --configure"
 
-The RaspImgConfig.sh is a shell(bash) script and only works with Linux for now. 
+	6. You will get the option to either download the latest image of Raspbian Linux OS or if you have the image downloaded, you can give the full
+	   path of the image- "/home/timon_pumba/Downloads/2015-04-19-Raspbian-XXX-XXX.Zip". If you have the Raspbian OS already in the SD card, you 
+	   can select the option "Use_image_on_SD_card" to configure the image directly on the SD card.
+
+	7. You can burn the modified image to an SD card or choose to just modify the image file and keep it. If you choose the later, choose the "Quit"
+	   option when asked for "Please select the target SD card path:".
+
+	8. You will be asked to enter the various Ethernet and Wi-Fi parameters and verify them. If your Laptop is already connected to a Wi-Fi network, 
+	   the script will automatically detect the hotspot(SSID) as default and ask you for the password. 
+
+	9. After you finish feeding all the parameters, the script will configure the image and either burn the image on an SD card or simply
+	   exit according to the selection made in the begining.
+
+	10. If the script has been interrupted in a previous occasion and is not working presently then use "--clean" option to delete any files and
+		directories generated by the script. Keep a backup of the original downloaded Raspbian Image. In case this script was used to download
+		the latest image- backup the "raspbian_latest" file inside the "ras_download" directory. "raspbian_latest" is the latest Raspbian Image. 
+
+How to use the script to connect(SSH) to a Raspberry Pi:
+
+	1. "nmap" tool must be installed to use this feature. Use "apt-get install nmap" for Ubuntu. Use your distribution's package manager to install
+	   "nmap".
+
+	2. Run the script - "./RaspImgConfig --connect". The script will find the device and SSH into it with username - "pi" and will give you a 
+	   password prompt where you will have to give the password(raspberry) and you will get an SSH prompt. 
+
+	3. The script installs a server script "nc_server.sh" in the "/home/pi", which opens the port "23871". When --connect option is used the 
+	   nmap utility searches for the open port mentioned above. If not required the script can be deleted once SSH connection is established.
+	   Port number can be changed from the script. 
 
 
+Issues:
+
+	Visit www.glowingthumb.com and navigate to "Raspberry Pi" section for videos, tutorials and solutions. You can leave a comment about any issues 
+	you are facing and we will get back to you.
