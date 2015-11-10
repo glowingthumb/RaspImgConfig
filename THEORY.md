@@ -15,7 +15,7 @@ Below are the steps to boot the Raspberry for the first time:-
 8. Connect the USB power cable from the board to you PC/Laptop or to a power adapter.
 9. After you insert the USB power cable you will see in the monitor a configuration prompt
    asking you to continue. You will have to use your keyboard to navigate.
-10.You can now use the the board in graphical mode with X enabled or command line mode
+10.You can now use the board in graphical mode with X enabled or command line mode
    through SSH using network, you will find a lot of articles over the internet related to this.
    
 Playing with real hardware is lot more fun than virtualization. You can also use QEMU on Linux to 
@@ -50,6 +50,6 @@ The RaspImgConfig.sh solves this problem. The script optionally downloads the la
 It asks you details of WiFi and Ethernet and writes the relevant files to the image and configures the image before 
 burning it on the SD card.
 
-Please read the README.md for further deails.
+Please read the README.md for further details.
 
 The RaspImgConfig.sh is a shell(bash) script and only works with Linux for now. 
