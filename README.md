@@ -14,7 +14,7 @@ IMPORTANT: Downloading the latest Raspbian Linux Image requires a lot of time, p
 
 # How to use the script to configure
 
-1. Download the script from www.github.com/glowingthumb/raspimgconfig> by navigating to the page and using the "Download Zip" option or you can `git clone` the repository.
+1. Download the script from [www.github.com/glowingthumb/raspimgconfig](http://www.github.com/glowingthumb/raspimgconfig) by navigating to the page and using the "Download Zip" option or you can `git clone` the repository.
 2. Make sure you have atleast 4GB space where you are downloading, making a new directory is advised.
 3. Either use "sudo" or change to "root" user as this script does mounting/unmounting stuff.
 4. Give execute permission to the script- `chomd +x RaspImgConfig.sh`
