@@ -1,3 +1,4 @@
+#!/bin/bash
 #   Script to configure Raspbian Operating System image for Raspberry Pi.
 #   Copyright (C) 2015  Subhajit Ghosh (subhajit@glowingthumb.com)
 #
@@ -14,7 +15,6 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#!/bin/bash
 set +x
 
 export RIC_RASP_LETEST_URL="https://downloads.raspberrypi.org/raspbian_latest"
