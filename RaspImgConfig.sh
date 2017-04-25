@@ -36,6 +36,7 @@ export RIC_SUMM_FILE="summary.conf"
 export RIC_NC_SERVER="nc_server.sh"
 export RIC_NC_PORT="23871"
 export RIC_IMG_FILE_NAME="raspimg.img"
+export RIC_SSH_ENABLE_FILE="ssh"
 
 
 ric_is_root()
@@ -695,6 +696,13 @@ ric_configure()
     if [ "$?" != "0" ]
     then
         echo "Could not write WiFi settings."
+    fi
+	# https://www.raspberrypi.org/documentation/remote-access/ssh/
+	# Fix for enabling ssh
+	touch mo1/$RIC_SSH_ENABLE_FILE 
+    if [ "$?" != "0" ]
+    then
+        echo "Could not write ssh file to Enable SSH."
     fi
     ric_nc_server
     ric_prep_cfg_summ
