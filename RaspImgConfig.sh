@@ -35,7 +35,7 @@ export RIC_TMP_ETH_FILE="interfaces.conf"
 export RIC_SUMM_FILE="summary.conf"
 export RIC_NC_SERVER="nc_server.sh"
 export RIC_NC_PORT="23871"
-export RIC_IMG_FILE_NAME="raspimg.img"
+export RIC_IMG_FILE_NAME="RaspbianOS.img"
 export RIC_SSH_ENABLE_FILE="ssh"
 
 
@@ -51,7 +51,7 @@ ric_is_root()
 
 ric_is_space_enough()
 {
-	SIZE_DW=`df --output=avail ras_download/ | tail -n1`
+	SIZE_DW=`df --output=avail Raspbian_OS_Download/ | tail -n1`
         if [ $SIZE_DW -lt 4194304 ]
 	then
                 echo "Minimum 4GB disk space required to download and configure the image. Exiting."
@@ -62,7 +62,7 @@ ric_is_space_enough()
 
 ric_is_perm()
 {
-        mkdir -p ras_download mo1 mo2
+        mkdir -p Raspbian_OS_Download mo1 mo2
 	if [ "$?" != "0" ]
 	then
 		echo "No permission to create directory or directory already present. Exiting."
@@ -86,7 +86,7 @@ ric_download_image()
 {
 	echo "Starting download using wget utility. Its going to take some time."
         echo
-        pushd ras_download > /dev/null
+        pushd Raspbian_OS_Download > /dev/null
 	wget $RIC_RASP_LETEST_URL
 	if [ "x$?" != "x0" ]
 	then
@@ -100,8 +100,8 @@ ric_download_image()
 
 ric_copy_image()
 {
-        echo "Copying Image. Please wait..."
-        cp $RIC_RASP_SRC_IMG_PATH ras_download &>/dev/null
+    echo "Copying Image. Please wait..."
+    cp $RIC_RASP_SRC_IMG_PATH Raspbian_OS_Download/$RIC_IMG_FILE_NAME &>/dev/null
 	if [ "x$?" != "x0" ]
 	then
 		echo "Image copy failed. Exiting."
@@ -164,11 +164,15 @@ check_sd() # Not to called directly, use the next function
                                      echo "Press Enter to continue..."
                                      read
                                      RIC_SD_PATH="$opt"
-                                     PARTS=`ls -1 $opt?`
-                                     for P in $PARTS
-                                     do
-                                        umount $P &>/dev/null
-                                     done
+									 ls "$opt""?" &>/dev/null
+									 if [ "x$?" == "x0" ]
+									 then
+                                     	PARTS=`ls -1 $opt?`
+                                     	for P in $PARTS
+                                     	do
+                                        	umount $P &>/dev/null
+                                     	done
+									fi
 				else
                                      echo "Path could not be verified to be a proper block device."
                                      echo "The input image file will be modified."
@@ -235,7 +239,7 @@ ric_is_sw_state_ok()
 
 ric_copy_unzip_img()
 {
-	NO_OF_FILES=`ls -1 ras_download/ | wc -l`
+	NO_OF_FILES=`ls -1 Raspbian_OS_Download/ | wc -l`
 	if [ "$NO_OF_FILES" -gt "2" ]
 	then
 		echo "More than 2 files in the download directory. Exiting."
@@ -243,7 +247,7 @@ ric_copy_unzip_img()
 	fi
 	if [ "$NO_OF_FILES" == "1" ]
 	then
-                pushd ras_download > /dev/null
+                pushd Raspbian_OS_Download > /dev/null
 		NAME=`ls -1`
                 TYPE=`file -b $NAME | cut -d' ' -f1`
 		if [ "x$TYPE" == "xx86" ]
@@ -271,7 +275,7 @@ ric_copy_unzip_img()
 	fi
 	if [ "x$NO_OF_FILES" == "x2" ]
 	then
-                pushd ras_download > /dev/null
+                pushd Raspbian_OS_Download > /dev/null
 		NAMES=`ls -1`
 		export GOTIT=0
 		for i in $NAMES
@@ -286,7 +290,7 @@ ric_copy_unzip_img()
 		if [ "x$GOTIT" != "x1" ]
 		then
 			echo "Image file not found. Someting wrong. Run script with --clean option. \
-			Back up the image file as it will be deleted from ras_download directory."
+			Back up the image file as it will be deleted from Raspbian_OS_Download directory."
                         popd > /dev/null
 			exit 1
 		fi
@@ -297,7 +301,7 @@ ric_copy_unzip_img()
 
 ric_calc_mnt_img()
 {
-    pushd ras_download > /dev/null
+    pushd Raspbian_OS_Download > /dev/null
     FIRST_OFFSET=`fdisk -l $RIC_IMG_FILE_NAME | grep -A2 Device | head -n2 | tail -n1 | awk '{print $2}'`
     SECOND_OFFSET=`fdisk -l $RIC_IMG_FILE_NAME | grep -A2 Device | tail -n1 | awk '{print $2}'`
     FIRST_OFFSET=$(( $FIRST_OFFSET * 512 ))
@@ -322,25 +326,44 @@ ric_calc_mnt_img()
 
 ric_calc_mnt_img_card()
 {
-    if [ ! -b "${RIC_IMG_FILE_NAME}1" -o ! -b "${RIC_IMG_FILE_NAME}2" ]
+    if [ -b "${RIC_IMG_FILE_NAME}1" -a -b "${RIC_IMG_FILE_NAME}2" -a ! -b "${RIC_IMG_FILE_NAME}3" \
+	-a ! -b "${RIC_IMG_FILE_NAME}4" -a ! -b "${RIC_IMG_FILE_NAME}5" -a ! -b "${RIC_IMG_FILE_NAME}6" -a ! -b "${RIC_IMG_FILE_NAME}7" ]
     then
-        echo "Correct partitions not detected in SD Card. Exiting..."
-        exit 1
-    fi
-    umount "${RIC_IMG_FILE_NAME}1" &> /dev/null
-    umount "${RIC_IMG_FILE_NAME}2" &> /dev/null
-    mount ${RIC_IMG_FILE_NAME}1 mo1
-    if [ "x$?" != "x0" ]
-    then
-        echo "Mounting failed. Exiting."
+        echo "Hopefully Raspbian."
+    	umount "${RIC_IMG_FILE_NAME}1 ${RIC_IMG_FILE_NAME}2" &> /dev/null
+    	mount ${RIC_IMG_FILE_NAME}1 mo1
+    	if [ "x$?" != "x0" ]
+    	then
+        	echo "Mounting failed. Exiting."
+        	exit 1;
+    	fi
+    	mount ${RIC_IMG_FILE_NAME}2 mo2
+    	if [ "x$?" != "x0" ]
+    	then
+        	echo "Mounting failed. Exiting."
+        	exit 1;
+    	fi
+    elif [ -b "${RIC_IMG_FILE_NAME}1" -a -b "${RIC_IMG_FILE_NAME}2" -a ! -b "${RIC_IMG_FILE_NAME}3" \
+	-a ! -b "${RIC_IMG_FILE_NAME}4" -a -b "${RIC_IMG_FILE_NAME}5" -a -b "${RIC_IMG_FILE_NAME}6" -a -b "${RIC_IMG_FILE_NAME}7" ]
+	then
+		echo "Hopefully Raspbian installed through NOOBS"
+		umount "${RIC_IMG_FILE_NAME}5 ${RIC_IMG_FILE_NAME}6 ${RIC_IMG_FILE_NAME}7" &> /dev/null
+    	mount ${RIC_IMG_FILE_NAME}6 mo1
+    	if [ "x$?" != "x0" ]
+    	then
+        	echo "Mounting failed. Exiting."
+        	exit 1;
+    	fi
+    	mount ${RIC_IMG_FILE_NAME}7 mo2
+    	if [ "x$?" != "x0" ]
+    	then
+        	echo "Mounting failed. Exiting."
+        	exit 1;
+    	fi
+	else
+        echo "Correct partitions not found on SD Card. Exiting."
         exit 1;
-    fi
-    mount ${RIC_IMG_FILE_NAME}2 mo2
-    if [ "x$?" != "x0" ]
-    then
-        echo "Mounting failed. Exiting."
-        exit 1;
-    fi
+	fi
     return 0
 }
 
@@ -385,19 +408,19 @@ ric_ask_eth()
 		read val
                 echo " "
                 if [ "x$val" == "xy" -o "x$val" == "xY" ]
-		then
-			cnt=1
+				then
+					cnt=1
                 elif [ "x$val" == "xq" -o "x$val" == "xQ" ]
                 then
-			echo "Exiting."
-			exit 1
+					echo "Exiting."
+					exit 1
                 elif [ "x$val" == "xn" -o "x$val" == "xN" ]
                 then
-			cnt=0
-		else
-                        clear
-                        echo "Invalid selection."
-		fi
+					cnt=0
+				else
+                	clear
+                    echo "Invalid selection."
+				fi
 	done
 	return 0;
 }
@@ -526,7 +549,7 @@ ric_ask_img_path()
 {
     export selp=1
     echo "Please enter the absolute path of the image file: "
-    read RIC_RASP_SRC_IMG_PATH
+    read -e -p "Path:" RIC_RASP_SRC_IMG_PATH
     while [ "$selp" == "1" ]
     do
         clear
@@ -539,8 +562,7 @@ ric_ask_img_path()
             do
                 case $opt in
                      "Try_again")
-                                 echo "Enter path: "
-                                 read RIC_RASP_SRC_IMG_PATH
+    							 read -e -p "Path:" RIC_RASP_SRC_IMG_PATH
                                  break
                              ;;
                      "Quit")
@@ -692,11 +714,13 @@ ric_configure()
     then
         echo "Could not write Ethernet settings."
     fi
+    chmod 644 mo2/etc/network/interfaces
     cp $RIC_TMP_WPA_FILE mo2/etc/wpa_supplicant/wpa_supplicant.conf
     if [ "$?" != "0" ]
     then
         echo "Could not write WiFi settings."
     fi
+    chmod 755 mo2/etc/wpa_supplicant/wpa_supplicant.conf
 	# https://www.raspberrypi.org/documentation/remote-access/ssh/
 	# Fix for enabling ssh
 	touch mo1/$RIC_SSH_ENABLE_FILE 
@@ -742,13 +766,13 @@ ric_burn()
     if [ "$?" == "0" ]
     then
         echo "Burning Image. Pease wait"
-        pushd ras_download > /dev/null
+        pushd Raspbian_OS_Download > /dev/null
         dd if=$RIC_IMG_FILE_NAME bs=512 | pv | dd of=$RIC_SD_PATH bs=512
         popd > /dev/null
         echo "Burning complete."
     else
         echo "Burning Image. Pease wait"
-        pushd ras_download > /dev/null
+        pushd Raspbian_OS_Download > /dev/null
         dd if=$RIC_IMG_FILE_NAME of=$RIC_SD_PATH bs=512
         popd
         echo "Burning complete."
@@ -803,7 +827,7 @@ ric_clean()
     umount mo1 &>/dev/null
     sync
     umount mo2 &>/dev/null
-    rm -rf mo1 mo2 $RIC_TMP_WPA_FILE $RIC_TMP_ETH_FILE $RIC_SUMM_FILE ras_download $RIC_NC_SERVER
+    rm -rf mo1 mo2 $RIC_TMP_WPA_FILE $RIC_TMP_ETH_FILE $RIC_SUMM_FILE Raspbian_OS_Download $RIC_NC_SERVER
     echo "Cleaning complete"
     return 0
 }
@@ -825,7 +849,7 @@ echo "--configure   If you want to download the latest Raspbian OS image and con
 --clean       If the script is not working or previous invocation of the script has generated files and directories.
               Warning: Please keep a backup of the Master image or the Original Raspbian Zip image which you have
               downloaded as this option will delete everything. In case of download through this script, please back
-              up th file nemed \"raspbian_latest\" in the directory \"ras_download\"- this is your Zip image
+              up th file nemed \"raspbian_latest\" in the directory \"Raspbian_OS_Download\"- this is your Zip image
               of the latest Raspbian OS.
 
 --copying     See GPL license.
